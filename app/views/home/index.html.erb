@@ -1,0 +1,31 @@
+<div class="container">
+  <h2>Welcome to Payroll Management System!</h2>
+
+  <% if current_user %>
+    <p>Logged in as: <%= current_user.email %> (Role: <%= current_user.role %>)</p>
+
+    <% if current_user.admin? %>
+      <h3>We made it easy to manage your employees:</h3>
+      <ul>
+  <li>✅ <%= link_to "Manage Employees", employees_path %></li>
+  <li>✅ <%= link_to "Manage Salaries", admin_salaries_path %></li>
+  <li>✅ <%= link_to "Manage Attendance", admin_attendances_path %></li>
+</ul>
+
+
+    <% elsif current_user.employee? %>
+      <h3>We made it easy to manage your:</h3>
+      <ul>
+        <li>✅ <%= link_to "Your Investments", investments_path %></li>
+        <li>✅ <%= link_to "Your Salary Slip", salaries_path %></li>
+      </ul>
+
+    <% else %>
+      <p>Unknown role detected. Please contact Admin to update your user role.</p>
+    <% end %>
+
+  <% else %>
+    <p>You are not logged in.</p>
+    <%= link_to "Login", new_user_session_path %>
+  <% end %>
+</div>

@@ -1,0 +1,10 @@
+<ul>
+    <% if current_user.admin? %>
+      <li><%= link_to "Manage Employees", employees_path %></li>
+      <li><%= link_to "Manage Salaries", admin_salaries_path %></li>
+      <li><%= link_to "Manage Attendance", admin_attendances_path %></li> 
+    <% else %>
+      <li><%= link_to "Your Investments", investments_path %></li>
+      <li><%= link_to "Your Salary Slip", salaries_path %></li>
+    <% end %>
+</ul>

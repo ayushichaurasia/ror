@@ -1,0 +1,157 @@
+<div class="investments-container">
+    <h1>Investment Declarations</h1>
+    
+    <% if current_user.employee? %>
+        <div class="investment-form">
+            <h2>Add/Update Investment</h2>
+            <%= form_with(model: Investment.new, local: true) do |form| %>
+                <div class="form-group">
+                    <%= form.label :financial_year %>
+                    <%= form.select :financial_year, financial_years_options, { include_blank: "Select Financial Year" }, class: "form-control" %>
+                </div>
+                
+                <div class="form-group">
+                    <%= form.label :amount %>
+                    <%= form.number_field :amount, class: "form-control", step: "0.01", min: "0" %>
+                </div>
+                
+                <div class="form-actions">
+                    <%= form.submit "Save Investment", class: "button" %>
+                </div>
+            <% end %>
+        </div>
+        
+        <div class="investment-history">
+            <h2>Your Investment History</h2>
+            <% if @investments.present? %>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Financial Year</th>
+                            <th>Amount</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% @investments.each do |investment| %>
+                            <tr>
+                                <td><%= investment.financial_year %></td>
+                                <td>₹ <%= number_with_precision(investment.amount, precision: 2) %></td>
+                                <td>
+                                    <button class="button edit-button" data-investment-id="<%= investment.id %>" 
+                                            data-financial-year="<%= investment.financial_year %>" 
+                                            data-amount="<%= investment.amount %>">
+                                        Edit
+                                    </button>
+                                </td>
+                            </tr>
+                        <% end %>
+                    </tbody>
+                </table>
+            <% else %>
+                <p>No investments declared yet.</p>
+            <% end %>
+        </div>
+    <% else %>
+        <p>You do not have access to this page.</p>
+    <% end %>
+</div>
+
+<% content_for :page_scripts do %>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Edit investment functionality
+        document.querySelectorAll('.edit-button').forEach(button => {
+            button.addEventListener('click', function() {
+                const investmentId = this.dataset.investmentId;
+                const financialYear = this.dataset.financialYear;
+                const amount = this.dataset.amount;
+                
+                const form = document.querySelector('form');
+                form.action = '/investments/' + investmentId;
+                
+                // Add method override for PUT request
+                let methodInput = document.querySelector('input[name="_method"]');
+                if (!methodInput) {
+                    methodInput = document.createElement('input');
+                    methodInput.type = 'hidden';
+                    methodInput.name = '_method';
+                    form.appendChild(methodInput);
+                }
+                methodInput.value = 'patch';
+                
+                // Set form values
+                document.querySelector('select[name="investment[financial_year]"]').value = financialYear;
+                document.querySelector('input[name="investment[amount]"]').value = amount;
+                
+                // Change submit button text
+                document.querySelector('input[type="submit"]').value = 'Update Investment';
+                
+                // Scroll to form
+                document.querySelector('.investment-form').scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+    });
+</script>
+<% end %>
+
+<style>
+    .investments-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .investment-form {
+        margin-bottom: 30px;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 5px;
+    }
+    
+    .form-group {
+        margin-bottom: 15px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background-color: white;
+        color: black;
+    }
+    
+    .form-actions {
+        margin-top: 20px;
+    }
+    
+    .investment-history table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .investment-history table th, .investment-history table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+    
+    .investment-history table th {
+        background-color: rgba(0, 0, 0, 0.2);
+    }
+    
+    .edit-button {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 3px;
+        cursor: pointer;
+    }
+</style>
