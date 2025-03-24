@@ -1,0 +1,25 @@
+<h1>All Blogs</h1>
+<%= link_to 'Create Your New Blog', new_blog_path, class: 'btn btn-primary' %>
+
+<div class="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @blogs.each do |blog| %>
+        <tr>
+          <td><%= link_to blog.title, blog_path(blog), class: "blog-title-link" %></td>
+          <td>
+            <%= link_to 'Edit', edit_blog_path(blog), class: "btn btn-edit" %>
+            <%= button_to "Delete", blog_path(blog), method: :delete, form: { data: { turbo_confirm: "Are you sure?" } }, class: "btn btn-delete" %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
