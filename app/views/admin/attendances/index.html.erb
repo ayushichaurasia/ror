@@ -1,0 +1,164 @@
+<h2>Manage Attendance</h2>
+
+<table>
+  <tr>
+    <th>Emp ID</th>
+    <th>Name</th>
+    <th>Manage Attendance</th>
+  </tr>
+
+  <% @employees.each do |employee| %>
+    <tr>
+      <td><%= employee.id %></td>
+      <td><%= employee.name %></td>
+      <td>
+        <button onclick="toggleAttendance(<%= employee.id %>)">Manage</button>
+      </td>
+    </tr>
+    <tr id="attendance_<%= employee.id %>" style="display: none;">
+      <td colspan="3">
+        <label for="month_select_<%= employee.id %>">Select Month:</label>
+        <select id="month_select_<%= employee.id %>" onchange="loadAttendance(<%= employee.id %>)">
+          <% (1..Date.today.month).each do |m| %>
+            <option value="<%= m %>" <%= "selected" if m == Date.today.month %>><%= Date::MONTHNAMES[m] %></option>
+          <% end %>
+        </select>
+
+        <div id="calendar_<%= employee.id %>" class="attendance-calendar"></div>
+        <button class="save-attendance-btn" data-emp-id="<%= employee.id %>">Save</button>
+      </td>
+    </tr>
+  <% end %>
+</table>
+
+<script>
+  function toggleAttendance(empId) {
+    var row = document.getElementById('attendance_' + empId);
+    row.style.display = row.style.display === "none" ? "table-row" : "none";
+  }
+
+  function loadAttendance(empId) {
+    let month = document.getElementById('month_select_' + empId).value;
+    let currentDate = new Date();
+    let daysInMonth = new Date(currentDate.getFullYear(), month, 0).getDate();
+    
+    let calendarHtml = '<table border="1"><tr>';
+    let dayOfWeek = new Date(currentDate.getFullYear(), month - 1, 1).getDay();
+    let dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+    // Header with day names
+    for (let i = 0; i < 7; i++) {
+      calendarHtml += `<th>${dayNames[i]}</th>`;
+    }
+    calendarHtml += '</tr><tr>';
+
+    // Empty cells before the first day
+    for (let i = 0; i < dayOfWeek; i++) {
+      calendarHtml += '<td></td>';
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      let date = new Date(currentDate.getFullYear(), month - 1, day);
+      let isWeekend = date.getDay() === 0 || date.getDay() === 6;
+      let isFuture = (month == (new Date().getMonth() + 1) && day > new Date().getDate());
+      let status = isFuture ? "absent" : "absent"; // Default to absent
+
+      calendarHtml += `
+        <td ${isWeekend ? 'class="disabled-date"' : ''}>
+          ${day} <br>
+          ${isWeekend ? '<span>❌</span>' : `
+          <button 
+            class="attendance-btn ${status}" 
+            data-employee-id="${empId}" 
+            data-day="${day}" 
+            data-status="${status}"
+          >
+            ${status === "present" ? "✔" : "✖"}
+          </button>`}
+        </td>
+      `;
+
+      if ((day + dayOfWeek) % 7 === 0) {
+        calendarHtml += '</tr><tr>';
+      }
+    }
+
+    calendarHtml += '</tr></table>';
+    document.getElementById('calendar_' + empId).innerHTML = calendarHtml;
+
+    attachAttendanceEventListeners();
+  }
+
+  function attachAttendanceEventListeners() {
+    document.querySelectorAll(".attendance-btn").forEach(btn => {
+      btn.addEventListener("click", function() {
+        let currentStatus = this.dataset.status;
+        let newStatus = currentStatus === "present" ? "absent" : "present";
+
+        this.dataset.status = newStatus;
+        this.classList.toggle("present");
+        this.classList.toggle("absent");
+        this.innerText = newStatus === "present" ? "✔" : "✖";
+      });
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".save-attendance-btn").forEach(button => {
+      button.addEventListener("click", function () {
+        saveAttendance(this.dataset.empId);
+      });
+    });
+  });
+
+  function saveAttendance(empId) {
+    let month = document.getElementById('month_select_' + empId).value;
+    let attendanceData = {};
+
+    document.querySelectorAll(`[data-employee-id='${empId}']`).forEach(btn => {
+      attendanceData[btn.dataset.day] = btn.dataset.status;
+    });
+
+    const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+    if (!csrfMeta) {
+      console.error("CSRF token not found!");
+      return;
+    }
+
+    const csrfToken = csrfMeta.getAttribute('content');
+
+    fetch(`/admin/attendances/${empId}/update_attendance`, {
+      method: "PATCH",
+      headers: { 
+        "Content-Type": "application/json",
+        "X-CSRF-Token": csrfToken 
+      },
+      body: JSON.stringify({ 
+        attendance: { 
+          daily_attendance: attendanceData, 
+          month: month 
+        } 
+      }) 
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log("Response from server:", data);
+      alert(data.message);
+    })
+    .catch(error => console.error("Error saving attendance:", error));
+  }
+</script>
+
+<style>
+  .attendance-btn {
+    width: 30px;
+    height: 30px;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+  }
+  .present { background-color: green; color: white; }
+  .absent { background-color: red; color: white; }
+  table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+  th, td { padding: 8px; text-align: center; border: 1px solid #ddd; }
+</style>

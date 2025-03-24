@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<%= csrf_meta_tags %>">
+    <title>Payroll Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(120deg, #00c6ff, #0072ff);
+            color: white;
+            margin: 0;
+            padding: 0;
+        }
+        .navbar {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            text-align: center;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+        }
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .button {
+            background: #FFCC00;
+            color: black;
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <% if user_signed_in? %>
+            <a href="/">Home</a>
+            <% if current_user.admin? %>
+                <a href="/employees">Manage Employees</a>
+                <a href="<%= admin_attendances_path %>">Manage Attendance</a>
+                <a href="<%= admin_salaries_path %>">Manage Salary</a>
+            <% elsif current_user.employee? %>
+                <a href="/investments">My Investments</a>
+                <a href="/salary_slip/<%= current_user.id %>/03/2025">My Salary Slip</a>
+            <% end %>
+            <a href="/users/sign_out" data-method="delete">Logout</a>
+        <% else %>
+            <a href="/users/sign_in">Login</a>
+            <a href="/users/sign_up">Sign Up</a>
+        <% end %>
+    </div>
+
+    <div class="container">
+        <%= yield %> 
+    </div>
+
+</body>
+</html>

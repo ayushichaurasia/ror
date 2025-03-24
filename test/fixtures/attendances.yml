@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  employee: one
+  month: 1
+  year: 1
+  unpaid_leaves: 1
+
+two:
+  employee: two
+  month: 1
+  year: 1
+  unpaid_leaves: 1

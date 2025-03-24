@@ -1,0 +1,24 @@
+<h2>Edit Employee</h2>
+
+<%= form_with(model: @employee, local: true) do |form| %>
+  <div>
+    <%= form.label :name %>
+    <%= form.text_field :name %>
+  </div>
+
+  <div>
+    <%= form.label :designation %>
+    <%= form.text_field :designation %>
+  </div>
+
+  <div>
+    <%= form.fields_for :salary, @employee.salary || @employee.build_salary do |salary_fields| %>
+      <%= salary_fields.label :amount %>
+      <%= salary_fields.number_field :amount %>
+    <% end %>
+  </div>
+
+  <div>
+    <%= form.submit "Update Employee" %>
+  </div>
+<% end %>
