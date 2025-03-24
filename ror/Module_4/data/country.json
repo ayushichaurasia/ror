@@ -1,0 +1,20 @@
+[
+    {
+        "name": "India",
+        "population": 143810000,
+        "gdp": 42700000,
+        "states": 28,
+        "army_strength": 1450000,
+        "status": "developing"
+      },
+    {
+      "name": "Japan",
+      "population": 123740000,
+      "gdp": 43900000,
+      "states": 47,
+      "army_strength": 150700,
+      "status": "developed"
+    }
+    
+  ]
+  
